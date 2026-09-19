@@ -15,10 +15,10 @@ app.use(cors({
     credentials:true
 }));
 
-app.use(cookieParser);
+// app.use(cookieParser);
 app.use(morgan("dev"));
 
-app.use("/auth",proxy(process.env.AUTH_SERVICE))
+app.use("/api/auth",proxy(process.env.AUTH_SERVICE))
 
 app.get("/",(req,res)=>{
     res.json({msg:"hello from gateway"});
