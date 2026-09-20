@@ -4,6 +4,8 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import morgan from "morgan";
 import proxy from "express-http-proxy";
+import { protect } from "./middleware/protect.js";
+import { getCurrUser } from "./controllers/user.controller.js";
 dotenv.config();
 
 const app = express();
@@ -15,10 +17,11 @@ app.use(cors({
     credentials:true
 }));
 
-// app.use(cookieParser);
+app.use(cookieParser());
 app.use(morgan("dev"));
 
 app.use("/api/auth",proxy(process.env.AUTH_SERVICE))
+app.get("/api/me",protect,getCurrUser)
 
 app.get("/",(req,res)=>{
     res.json({msg:"hello from gateway"});

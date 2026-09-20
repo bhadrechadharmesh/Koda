@@ -28,7 +28,7 @@ export const login = async (req,res)=>{
 
         await redis.set(`session-${sessionID}`,JSON.stringify( {
             name:user.name,
-            userId : user._id,
+            _id : user._id,
             email : user.email,
             avatar: user.avatar
         }), "EX",7*24*60*60 )
@@ -51,7 +51,7 @@ export const login = async (req,res)=>{
 
 export const logout = async(req,res)=>{
     try{
-        const sessionID = req.cookie?.session
+        const sessionID = req.cookies?.session
         await redis.del(`session-${sessionID}`)
 
         res.clearCookie("session");
