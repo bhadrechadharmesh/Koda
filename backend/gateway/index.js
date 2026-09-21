@@ -6,6 +6,7 @@ import morgan from "morgan";
 import proxy from "express-http-proxy";
 import { protect } from "./middleware/protect.js";
 import { getCurrUser } from "./controllers/user.controller.js";
+import { proxyWithHeader } from "./utils/proxyWithHeader.js";
 dotenv.config();
 
 const app = express();
@@ -21,6 +22,8 @@ app.use(cookieParser());
 app.use(morgan("dev"));
 
 app.use("/api/auth",proxy(process.env.AUTH_SERVICE))
+app.use("/api/project",protect,proxyWithHeader(process.env.PROJECT_SERVICE));
+
 app.get("/api/me",protect,getCurrUser)
 
 app.get("/",(req,res)=>{
