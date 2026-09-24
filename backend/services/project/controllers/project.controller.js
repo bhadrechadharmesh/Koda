@@ -101,7 +101,7 @@ export const getStarredProjects = async (req, res) => {
   }
 };
 
-export const toggleStar = async () => {
+export const toggleStar = async (req,res) => {
   try {
 
     const userId = req.headers["x-user-id"]
@@ -115,6 +115,9 @@ export const toggleStar = async () => {
 
     const key =  `starred-project-${userId}`
     await redis.del(key)
+
+    const key2 =  `project-${userId}`
+    await redis.del(key2)
 
     if(!project){
         return res.status(404).json({message:"project not found"})
