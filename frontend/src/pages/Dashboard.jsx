@@ -1,17 +1,29 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../firebase.js";
 import { login } from "../features/login.js";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserData } from "../redux/userSlice.js";
+import NavBar from "../components/NavBar.jsx";
+import SideBar from "../components/SideBar.jsx";
+import { FiLoader, FiPlus } from "react-icons/fi";
+import { getProjects, getStarredProjects } from "../features/project.js";
+import { setProjects } from "../redux/projectSlice.js";
+import ProjectCard from "../components/ProjectCard.jsx";
+import CreateProjectModel from "../components/CreateProjectModel.jsx";
 
 function Dashboard() {
   const [loading, setLoading] = useState(false);
+  const [loadingProjects,setLoadingProjects] = useState(false);
+  const [activeSession , setActiveSession] = useState("project")
+
+  const [openModel,setOpenModel] = useState(false)
 
   const dispatch = useDispatch();
 
   const { userData } = useSelector((state) => state.user);
+  const {projects} = useSelector((state)=>state.project)
 
   const handleLogin = async () => {
     setLoading(true);
@@ -29,6 +41,28 @@ function Dashboard() {
 
     // console.log(d)
   };
+
+  const fetchAllProjects = async()=>{
+    setLoadingProjects(true)
+    const data = await getProjects();
+    dispatch(setProjects(data))
+    setLoadingProjects(false)
+  }
+
+  const fetchStarredProjects = async()=>{
+    setLoadingProjects(true)
+    const data = await getStarredProjects();
+    dispatch(setProjects(data))
+    setLoadingProjects(false)
+  }
+
+  useEffect(()=>{
+    if(activeSession=="projects"){
+      fetchAllProjects()
+    }else{
+      fetchStarredProjects()
+    }
+  },[activeSession])
 
   if (!userData) {
     return (
@@ -72,15 +106,43 @@ function Dashboard() {
   }
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-slate-900 dark:text-pink">
-        Welcome, {userData.name}!
-      </h1>
-      <p className="mt-2 text-lg text-slate-700 dark:text-slate-400">
-        You are now logged in. Your email is {userData.email}.
-      </p>
+    <div className="relative flex h-screen w-full flex-col overflow-hidden bg-slate-50 transition-colors duration-300 dark:bg-[#07070c]">
+      <div className="pointer-events-none absolute -top-40 left-1/3 hidden h-[700px] w-[700px] rounded-full bg-white/[0.04] blur-[140px] dark:block" />
+      <div className="pointer-events-none absolute top-1/3 right-0 hidden h-[500px] w-[500px] rounded-full bg-white/[0.03] blur-[130px] dark:block" />
+
+      <div className="relative flex min-h-0 flex-1 flex-col" >
+          <NavBar/>
+
+          <div className="flex min-h-0 flex-1">
+            <SideBar activeSession={activeSession}  setActiveSession={setActiveSession}/>
+
+            <div className=" min-h-0 flex-1 overflow-y-auto px-8 py-8 [scrollbar-width:thin] [scrollbar-color:rgba(100,116,139,0.35)_transparent] dark:[scrollbar-color:rgba(100,116,139,0.45)_transparent] ">
+                <div className=" relative  w-full max-w-6xl items-center justify-between px-8 py-6 ">
+                  <h1 className="relative text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                    Welcome Back, {userData.name}
+                  </h1>
+
+                  <p className="mt-1 text-[13.5px] text-slate-500 dark:text-slate-400 " >Ready to build something amazing today!</p>
+
+                </div>
+                <button onClick={()=> setOpenModel(true)} className="flex shrink-0 items-center gap-1.5 px-4 py-2 rounded-lg bg-slate-900 text-white dark:bg-white dark:text-slate-900 "> <FiPlus/> <span>New Project</span> </button>
+            </div>
+          </div>
+
+          <div className="border-t border-slate-200 bg-white/70 px-6 py-3 backdrop-blur-md dark:border-white/10 dark:bg-white/5 ">
+            {activeSession=="starred"?"Starred Projects":"Recent Projects"}
+          </div>
+
+        {loadingProjects ? (<div className=""> <FiLoader/> </div> ): projects.length==0? (<div> <p className="text-[13.5px] text-slate-500 dark:text-slate-400 ">No Projects Found</p> </div> ):( <div> {projects.map((project)=>(<ProjectCard key={project._id} project={project}/>))} </div> )  }
+
+      </div>
+
+      {openModel &&  <CreateProjectModel openModel={openModel} onClose={()=> setOpenModel(false)} /> }
+
+     
+
     </div>
-  );        
+  );
     
 
 
