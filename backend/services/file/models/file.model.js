@@ -7,7 +7,6 @@ const fileSchema = new mongoose.Schema({
     },
     content:{
         type:String,
-        required:true
     },
     projectId:{
         type:mongoose.Schema.Types.ObjectId,

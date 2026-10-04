@@ -1,9 +1,9 @@
 export const buildFileTree = (files)=>{
     let map = {} 
-    let tree = {}
+    let tree = []
     
     files.forEach(file => {
-        map[file._id.toString] = { 
+        map[file._id.toString()] = { 
             ...file.toObject(),
             children:[]
         };
